@@ -1,73 +1,56 @@
-/*
- * grunt-barbarian-ombudsman
- * https://github.com/teemu/barbarian-ombudsman-grunt
- *
- * Copyright (c) 2015 Teemu
- * Licensed under the MIT license.
- */
-
 'use strict';
 
-module.exports = function(grunt) {
+var jsPaths = ['./lib/**/*.js',
+               './test/**/*.js',
+               './tasks/*.js',
+               'Gruntfile.js'];
 
-  // Project configuration.
+module.exports = function(grunt) {
   grunt.initConfig({
     jshint: {
-      all: [
-        'Gruntfile.js',
-        'tasks/*.js',
-        '<%= nodeunit.tests %>'
-      ],
+      all: jsPaths,
       options: {
         jshintrc: '.jshintrc'
       }
     },
-
-    // Before generating any new files, remove any previously-created files.
-    clean: {
-      tests: ['tmp']
+    jscs: {
+      src: jsPaths,
+      options: {
+        config: '.jscsrc'
+      }
     },
-
-    // Configuration to be run (and then tested).
-    barbarian_ombudsman: {
-      default_options: {
+    'barbarian-ombudsman': {
+      runner: {
         options: {
-        },
-        files: {
-          'tmp/default_options': ['test/fixtures/testing', 'test/fixtures/123']
-        }
-      },
-      custom_options: {
-        options: {
-          separator: ': ',
-          punctuation: ' !!!'
-        },
-        files: {
-          'tmp/custom_options': ['test/fixtures/testing', 'test/fixtures/123']
+          prefix: false,
+          locales: ['fi', 'en'],
+          respath: './node_modules/barbarian-ombudsman/test/resources/plain/' +
+                   '__LOCALE__.json'
         }
       }
     },
-
-    // Unit tests.
-    nodeunit: {
-      tests: ['test/*_test.js']
+    mochaTest: {
+      test: {
+        src: ['test/**/*.js']
+      }
     }
-
   });
 
-  // Actually load this plugin's task(s).
   grunt.loadTasks('tasks');
 
-  // These plugins provide necessary tasks.
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-jscs');
   grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-contrib-nodeunit');
+  grunt.loadNpmTasks('grunt-mocha-test');
 
-  // Whenever the "test" task is run, first clean the "tmp" dir, then run this
-  // plugin's task(s), then test the result.
-  grunt.registerTask('test', ['clean', 'barbarian_ombudsman', 'nodeunit']);
-
-  // By default, lint and run all tests.
-  grunt.registerTask('default', ['jshint', 'test']);
-
+  grunt.registerTask('logCatcher', function() {
+    console._log = [];
+    console.log = function() {
+      console._log = console._log.concat(Array.prototype.slice.call(arguments));
+    };
+    console.error = function() {};
+  });
+  grunt.registerTask('test', ['logCatcher', 'barbarian-ombudsman',
+                              'mochaTest']);
+  grunt.registerTask('default', ['jshint', 'jscs', 'test']);
 };
