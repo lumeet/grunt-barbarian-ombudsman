@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/lumeet/grunt-barbarian-ombudsman.svg?branch=master)](https://travis-ci.org/lumeet/grunt-barbarian-ombudsman)
+
 # grunt-barbarian-ombudsman
 
 > Barbarian Ombudsman for Grunt
